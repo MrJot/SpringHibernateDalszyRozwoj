@@ -5,7 +5,11 @@ import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import pl.edu.agh.ki.mwo.model.SchoolClass;
+import pl.edu.agh.ki.mwo.model.Student;
 import pl.edu.agh.ki.mwo.persistence.DatabaseConnector;
 @Controller
 public class StudentController {
@@ -23,7 +27,7 @@ public class StudentController {
 	
     
     @RequestMapping(value="/AddStudent")
-    public String displayAddSchoolForm(Model model, HttpSession session) {    	
+    public String addStudent(Model model, HttpSession session) {    	
     	if (session.getAttribute("userLogin") == null)
     		return "redirect:/Login";
     	
@@ -31,37 +35,72 @@ public class StudentController {
         return "studentForm";    
     }
     
-    /*
-
-    @RequestMapping(value="/CreateSchool", method=RequestMethod.POST)
-    public String createSchool(@RequestParam(value="schoolName", required=false) String name,
-    		@RequestParam(value="schoolAddress", required=false) String address,
+    @RequestMapping(value="/ModifyStudent")
+    public String modifyStudent(@RequestParam(value="studentId", required=false) String studentId,
+    		@RequestParam(value="studentName", required=false) String name,
+    		@RequestParam(value="studentSurname", required=false) String surname,
+    		@RequestParam(value="studentPesel", required=false) String pesel,
+    		@RequestParam(value="schoolClassStudent",required=false)  String schoolClassId,
     		Model model, HttpSession session) {    	
     	if (session.getAttribute("userLogin") == null)
     		return "redirect:/Login";
     	
-    	School school = new School();
-    	school.setName(name);
-    	school.setAddress(address);
+    	Student student = DatabaseConnector.getInstance().getStudent(studentId);
     	
-    	DatabaseConnector.getInstance().addSchool(school);    	
-       	model.addAttribute("schools", DatabaseConnector.getInstance().getSchools());
-    	model.addAttribute("message", "Nowa szkoła została dodana");
-         	
-    	return "schoolsList";
+    	model.addAttribute("studentName", student.getName());
+    	model.addAttribute("studentSurname", student.getSurname());
+    	model.addAttribute("studentPesel", student.getPesel());
+    	model.addAttribute("schoolClasses", DatabaseConnector.getInstance().getSchoolClasses());
+    	
+    	student.setName(name);
+    	student.setSurname(surname);
+    	student.setPesel(pesel);
+    	
+    	DatabaseConnector.getInstance().saveModifiedStudent(student, schoolClassId);
+      	model.addAttribute("students", DatabaseConnector.getInstance().getStudents());
+    	model.addAttribute("message", "Zmiany dotyczace studenta zostaly zapisane");
+        return "studentModForm";
     }
     
-    @RequestMapping(value="/DeleteSchool", method=RequestMethod.POST)
-    public String deleteSchool(@RequestParam(value="schoolId", required=false) String schoolId,
+    
+
+    @RequestMapping(value="/CreateStudent", method=RequestMethod.POST)
+    public String createStudent(@RequestParam(value="studentName", required=false) String name,
+    		@RequestParam(value="studentSurname", required=false) String surname,
+    		@RequestParam(value="studentPesel", required=false) String pesel,
+    		@RequestParam(value="schoolClassStudent",required=false)  String schoolClassId,
     		Model model, HttpSession session) {    	
     	if (session.getAttribute("userLogin") == null)
     		return "redirect:/Login";
     	
-    	DatabaseConnector.getInstance().deleteSchool(schoolId);    	
-       	model.addAttribute("schools", DatabaseConnector.getInstance().getSchools());
-    	model.addAttribute("message", "Szkoła została usunięta");
+    	Student student = new Student();
+    	student.setName(name);
+    	student.setSurname(surname);
+    	student.setPesel(pesel);
+    	
+    	   
+    	DatabaseConnector.getInstance().addStudent(student, schoolClassId);
+       	model.addAttribute("students", DatabaseConnector.getInstance().getStudents());
+    	model.addAttribute("message", "Nowa uczen zostal dodany");
          	
-    	return "schoolsList";
+    	return "studentList";
     }
-*/
+    
+
+    
+    
+    
+    @RequestMapping(value="/DeleteStudent", method=RequestMethod.POST)
+    public String deleteStudent(@RequestParam(value="studentId", required=false) String studentId,
+    		Model model, HttpSession session) {    	
+    	if (session.getAttribute("userLogin") == null)
+    		return "redirect:/Login";
+    	
+    	DatabaseConnector.getInstance().deleteStudent(studentId);  	
+       	model.addAttribute("students", DatabaseConnector.getInstance().getStudents());
+    	model.addAttribute("message", "Student został usunięty");
+         	
+    	return "studentList";
+    }
+
 }

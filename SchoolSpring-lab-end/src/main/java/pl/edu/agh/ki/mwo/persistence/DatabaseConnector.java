@@ -101,6 +101,13 @@ public class DatabaseConnector {
 		return students;
 	}
 	
+	public Student getStudent(String studentId) {
+		String hql = "FROM Student S WHERE S.id="+studentId;
+		Query query = session.createQuery(hql);
+		List<Student> results = query.list();
+		return results.get(0);
+	}
+	
 	public void addStudent(Student student, String schoolClassId) {
 		String hql = "FROM SchoolClass S WHERE S.id=" + schoolClassId;
 		Query query = session.createQuery(hql);
@@ -116,4 +123,32 @@ public class DatabaseConnector {
 		transaction.commit();
 	}
 	
+	public void saveModifiedStudent(Student student, String schoolClassId) {
+		String hql = "FROM SchoolClass S WHERE S.id=" + schoolClassId;
+		Query query = session.createQuery(hql);
+		List<SchoolClass> results = query.list();
+		Transaction transaction = session.beginTransaction();
+		if (results.size() == 0) {
+			session.save(student);
+		} else {
+			SchoolClass schoolClass = results.get(0);
+			schoolClass.addStudent(student);
+			session.save(schoolClass);
+		}
+		transaction.commit();
+	}
+	
+	
+
+	
+	public void deleteStudent(String studentId) {
+		String hql = "FROM Student S WHERE S.id=" + studentId;
+		Query query = session.createQuery(hql);
+		List<Student> results = query.list();
+		Transaction transaction = session.beginTransaction();
+		for (Student s : results) {
+			session.delete(s);
+		}
+		transaction.commit();
+	}
 }
