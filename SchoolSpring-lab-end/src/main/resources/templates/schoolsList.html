@@ -10,12 +10,18 @@
     <div layout:fragment="content">
     	<div th:include="menuFragment" ></div>
 		<br/><Br/>
-		<table border="1" cellpadding="5">
-			<tr><th>Id</th><th>Nazwa</th><th>Adres</th><th>Akcje</th></tr>
+		<table border="1" cellpadding="6">
+			<tr><th>Id</th><th>Nazwa</th><th>Adres</th><th>Modyfikacja</th><th>Usun</th></tr>
 			<tr th:each="school: ${schools}">
 				<td><span th:text="${school.id}" /></td>
 				<td><span th:text="${school.name}" /></td>
 				<td><span th:text="${school.address}" /></td>
+				<td>
+		            <form action="ModifySchool" method="POST">
+		            	<input type="hidden" name="schoolId" th:value="${school.id}" />
+		                <button type="submit">Modify</button>
+		            </form>
+		        </td>
 		        <td>
 		            <form action="DeleteSchool" method="POST">
 		            	<input type="hidden" name="schoolId" th:value="${school.id}" />

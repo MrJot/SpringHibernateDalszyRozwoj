@@ -6,17 +6,25 @@
     <div layout:fragment="content">
     <div th:include="menuFragment" ></div>
     	<br/><br/>
-	   			<form action="ModifyStudent" method="POST">
+	   			<form action="SaveStudent" method="POST">
 					<table>
+					
 						<tr><td>Imie:</td><td><input type="text" name="studentName" th:value="${studentName}"/></td></tr>
 						<tr><td>Nazwisko:</td><td><input type="text" name="studentSurname" th:value="${studentSurname}" /></td></tr>
 						<tr><td>pesel:</td><td><input type="text" name="studentPesel" th:value="${studentPesel}" /></td></tr>
 						<tr><td>klasa:</td><td><select class="form-control" name="schoolClassStudent" id="schoolClassStudent">
 											    <option value="-1">---</option>
+												<!-- <option th:value="${schoolClassStudent}</option> -->
+												<option selected="hidden" th:value="${schoolClassStudent.id}" th:text="${schoolClassStudent.profile}"></option>
 											    <option th:each="schoolClass: ${schoolClasses}" th:value="${schoolClass.id}" th:text="${schoolClass.profile} + ', ' + ${schoolClass.currentYear}"></option>
 											    </select></td></tr>
 					</table><br/><BR/>
-					<input type="submit" value="Zapisz zmiany"/>
+					<!-- <input type="submit" value="Zapisz zmiany"/> -->
+					
+					    <!-- <form action="DeleteStudent" method="POST"> -->
+		            	<input type="hidden" name="studentId" th:value="${studentId}" />
+		                <button type="submit">Zapisz zmiany</button>
+		            <!--  </form>-->
 				</form>
     </div>
 

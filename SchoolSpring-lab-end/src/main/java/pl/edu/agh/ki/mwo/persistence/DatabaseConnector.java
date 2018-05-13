@@ -20,10 +20,10 @@ public class DatabaseConnector {
 		}
 		return instance;
 	}
+		
+		Session session;
 	
-	Session session;
-
-	protected DatabaseConnector() {
+		protected DatabaseConnector() {
 		session = HibernateUtil.getSessionFactory().openSession();
 	}
 	
@@ -41,11 +41,27 @@ public class DatabaseConnector {
 		return schools;
 	}
 	
+	public School getSpecificSchool(String schoolClassId) {
+		
+		String hql = "SELECT s FROM School s INNER JOIN s.classes classes WHERE classes.id="+schoolClassId;
+		Query query = session.createQuery(hql);
+		List<School> results = query.list();
+		System.out.println("School Name = "+results.get(0).getName());
+		
+		return results.get(0);
+		
+	}
+	
 	public void addSchool(School school) {
 		Transaction transaction = session.beginTransaction();
 		session.save(school);
 		transaction.commit();
 	}
+	
+	public School getSchool(long schoolId) {
+		return (School) session.get(School.class, schoolId);
+	}
+	
 	
 	public void deleteSchool(String schoolId) {
 		String hql = "FROM School S WHERE S.id=" + schoolId;
@@ -66,6 +82,8 @@ public class DatabaseConnector {
 		return schoolClasses;
 	}
 	
+	
+	
 	public void addSchoolClass(SchoolClass schoolClass, String schoolId) {
 		String hql = "FROM School S WHERE S.id=" + schoolId;
 		Query query = session.createQuery(hql);
@@ -81,6 +99,18 @@ public class DatabaseConnector {
 		transaction.commit();
 	}
 	
+	public void saveSchoolClass(SchoolClass schoolClass, String schoolId) {
+		String hql = "FROM School S WHERE S.id=" + schoolId;
+		Query query = session.createQuery(hql);
+		List<School> results = query.list();
+		Transaction transaction = session.beginTransaction();
+			School school = results.get(0);
+			System.out.println("School NAME: "+school.getName());
+			school.addClass(schoolClass);
+			session.save(school);
+		transaction.commit();
+	}
+	
 	public void deleteSchoolClass(String schoolClassId) {
 		String hql = "FROM SchoolClass S WHERE S.id=" + schoolClassId;
 		Query query = session.createQuery(hql);
@@ -90,6 +120,13 @@ public class DatabaseConnector {
 			session.delete(s);
 		}
 		transaction.commit();
+	}
+	
+	public SchoolClass getSchoolClass(String schoolClassId) {
+		String hql = "FROM SchoolClass S WHERE S.id="+schoolClassId;
+		Query query = session.createQuery(hql);
+		List<SchoolClass> results = query.list();
+		return results.get(0);
 	}
 	
 	//Students
@@ -123,22 +160,15 @@ public class DatabaseConnector {
 		transaction.commit();
 	}
 	
-	public void saveModifiedStudent(Student student, String schoolClassId) {
-		String hql = "FROM SchoolClass S WHERE S.id=" + schoolClassId;
+
+	
+	
+	public SchoolClass getSpecificStudentClass(String studentId) {
+		String hql = "SELECT S FROM SchoolClass S  INNER JOIN S.students student WHERE student.id="+studentId;
 		Query query = session.createQuery(hql);
-		List<SchoolClass> results = query.list();
-		Transaction transaction = session.beginTransaction();
-		if (results.size() == 0) {
-			session.save(student);
-		} else {
-			SchoolClass schoolClass = results.get(0);
-			schoolClass.addStudent(student);
-			session.save(schoolClass);
-		}
-		transaction.commit();
+		SchoolClass sclass = (SchoolClass) query.list().get(0);
+		return sclass;
 	}
-	
-	
 
 	
 	public void deleteStudent(String studentId) {
@@ -151,4 +181,10 @@ public class DatabaseConnector {
 		}
 		transaction.commit();
 	}
+
+
+
+
 }
+
+

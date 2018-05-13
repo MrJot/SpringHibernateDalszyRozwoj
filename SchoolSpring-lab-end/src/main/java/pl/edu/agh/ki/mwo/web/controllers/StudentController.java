@@ -35,31 +35,49 @@ public class StudentController {
         return "studentForm";    
     }
     
+    
+    
     @RequestMapping(value="/ModifyStudent")
-    public String modifyStudent(@RequestParam(value="studentId", required=false) String studentId,
-    		@RequestParam(value="studentName", required=false) String name,
-    		@RequestParam(value="studentSurname", required=false) String surname,
-    		@RequestParam(value="studentPesel", required=false) String pesel,
-    		@RequestParam(value="schoolClassStudent",required=false)  String schoolClassId,
+   public String modifyStudent(@RequestParam(value="studentId", required=false) String studentId,
     		Model model, HttpSession session) {    	
     	if (session.getAttribute("userLogin") == null)
     		return "redirect:/Login";
     	
     	Student student = DatabaseConnector.getInstance().getStudent(studentId);
-    	
     	model.addAttribute("studentName", student.getName());
     	model.addAttribute("studentSurname", student.getSurname());
     	model.addAttribute("studentPesel", student.getPesel());
+    	model.addAttribute("studentId",student.getId());
+    	model.addAttribute("schoolClassStudent", DatabaseConnector.getInstance().getSpecificStudentClass(studentId));
     	model.addAttribute("schoolClasses", DatabaseConnector.getInstance().getSchoolClasses());
+        return "studentModForm";
+    }
+    
+    @RequestMapping(value="/SaveStudent", method=RequestMethod.POST)
+    public String saveStudent(@RequestParam(value="studentName", required=false) String name,
+    		@RequestParam(value="studentSurname", required=false) String surname,
+    		@RequestParam(value="studentPesel", required=false) String pesel,
+    		@RequestParam(value="schoolClassStudent",required=false)  String schoolClassId,
+    		@RequestParam(value="studentId", required=false) String studentId,
+    		
+    		
+    		Model model, HttpSession session) {    	
+    	if (session.getAttribute("userLogin") == null)
+    		return "redirect:/Login";
     	
+    	
+    	Student student = DatabaseConnector.getInstance().getStudent(studentId);
+    
     	student.setName(name);
     	student.setSurname(surname);
     	student.setPesel(pesel);
     	
-    	DatabaseConnector.getInstance().saveModifiedStudent(student, schoolClassId);
-      	model.addAttribute("students", DatabaseConnector.getInstance().getStudents());
-    	model.addAttribute("message", "Zmiany dotyczace studenta zostaly zapisane");
-        return "studentModForm";
+    	   
+    	DatabaseConnector.getInstance().addStudent(student, schoolClassId);
+       	model.addAttribute("students", DatabaseConnector.getInstance().getStudents());
+    	model.addAttribute("message", "Dane studenta zostały zapisane.");
+         	
+    	return "studentList";
     }
     
     

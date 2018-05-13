@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import pl.edu.agh.ki.mwo.model.School;
+import pl.edu.agh.ki.mwo.model.SchoolClass;
 import pl.edu.agh.ki.mwo.persistence.DatabaseConnector;
 
 @Controller
@@ -46,6 +47,43 @@ public class SchoolsController {
     	DatabaseConnector.getInstance().addSchool(school);    	
        	model.addAttribute("schools", DatabaseConnector.getInstance().getSchools());
     	model.addAttribute("message", "Nowa szkoła została dodana");
+         	
+    	return "schoolsList";
+    }
+    
+    @RequestMapping(value="/ModifySchool", method=RequestMethod.POST)
+    public String modifySchool(@RequestParam(value="schoolName", required=false) String name,
+    		@RequestParam(value="schoolAddress", required=false) String address,
+    		@RequestParam(value="schoolId", required=false) long schoolId,
+    		Model model, HttpSession session) {    	
+    	if (session.getAttribute("userLogin") == null)
+    		return "redirect:/Login";
+    	
+    	School school = DatabaseConnector.getInstance().getSchool(schoolId);
+    	
+    	model.addAttribute("schoolId", school.getId());	
+       	model.addAttribute("schoolName", school.getName());
+    	model.addAttribute("schoolAddress", school.getAddress());
+         	
+    	return "schoolModForm";
+    }
+    
+    @RequestMapping(value="/SaveSchool", method=RequestMethod.POST)
+    public String saveSchool(
+    		@RequestParam(value="schoolId", required=false) long schoolId,
+    		@RequestParam(value="schoolName", required=false) String schoolName,
+    		@RequestParam(value="schoolAddress",required=false) String schoolAddress,
+    		Model model, HttpSession session) {    	
+    	if (session.getAttribute("userLogin") == null)
+    		return "redirect:/Login";
+    	
+    	School school = DatabaseConnector.getInstance().getSchool(schoolId);
+    	school.setAddress(schoolAddress);
+    	school.setName(schoolName);
+    	
+    	DatabaseConnector.getInstance().addSchool(school); 	
+    	model.addAttribute("schools", DatabaseConnector.getInstance().getSchools());
+    	model.addAttribute("message", "Dane dotyczace szkoly zostaly zapisane");
          	
     	return "schoolsList";
     }
